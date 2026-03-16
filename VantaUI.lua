@@ -103,6 +103,8 @@ function Maid:Clean()
             if task.Parent then
                 task:Destroy()
             end
+        elseif type(task) == "thread" then
+            pcall(task.cancel, task)
         elseif type(task) == "table" and task.Destroy then
             task:Destroy()
         end
@@ -377,6 +379,7 @@ function Library:Notify(config)
 
     local alive = true
     local notifObj = {}
+    local libraryRef = self
 
     function notifObj:Destroy(immediate)
         if not alive then
@@ -386,6 +389,12 @@ function Library:Notify(config)
 
         local function cleanup()
             notifMaid:Clean()
+            for i = #libraryRef._notifications, 1, -1 do
+                if libraryRef._notifications[i] == notifObj then
+                    table.remove(libraryRef._notifications, i)
+                    break
+                end
+            end
             if card.Parent then
                 card:Destroy()
             end
@@ -920,6 +929,11 @@ local function componentBase(tab, height)
 
     local componentMaid = Maid.new()
     componentMaid:Give(holder)
+    if tab._maid then
+        tab._maid:Give(function()
+            componentMaid:Clean()
+        end)
+    end
 
     return holder, componentMaid
 end
@@ -1012,6 +1026,9 @@ function Tab:AddButton(config)
     lib:_bindTheme(stroke, "Color", "Border")
 
     local fx = styleInteractive(lib, button, "SurfaceAlt", "AccentSoft")
+    maid:Give(function()
+        fx:Clean()
+    end)
 
     local callback = config.Callback or function() end
     trackConnection(maid, button.MouseButton1Click:Connect(function()
@@ -1024,7 +1041,6 @@ function Tab:AddButton(config)
 
     return {
         Destroy = function()
-            fx:Clean()
             maid:Clean()
         end,
     }
@@ -1175,7 +1191,8 @@ function Tab:AddSlider(config)
     end
 
     local function setVisual(v)
-        local alpha = (v - min) / (max - min)
+        local range = (max - min)
+        local alpha = range == 0 and 0 or (v - min) / range
         fill.Size = UDim2.new(alpha, 0, 1, 0)
         knob.Position = UDim2.new(alpha, 0, 0.5, 0)
         valueLabel.Text = string.format(config.Format or "%s", tostring(v))
@@ -1489,6 +1506,7 @@ function Library:Destroy()
 
     self._rootMaid:Clean()
     self._themeBindings = {}
+    self._notifications = {}
 end
 
 return Library
