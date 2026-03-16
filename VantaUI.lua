@@ -100,9 +100,7 @@ function Maid:Clean()
         elseif type(task) == "function" then
             task()
         elseif typeof(task) == "Instance" then
-            if task.Parent then
-                task:Destroy()
-            end
+            task:Destroy()
         elseif type(task) == "thread" then
             pcall(task.cancel, task)
         elseif type(task) == "table" and task.Destroy then
@@ -234,7 +232,7 @@ function Library:_ensureRoot()
         Parent = rootContainer,
     })
 
-    local notifLayout = create("UIListLayout", {
+    create("UIListLayout", {
         SortOrder = Enum.SortOrder.LayoutOrder,
         VerticalAlignment = Enum.VerticalAlignment.Top,
         HorizontalAlignment = Enum.HorizontalAlignment.Right,
@@ -315,7 +313,7 @@ function Library:Notify(config)
     addRound(card, UDim.new(0, 10))
     local stroke = addStroke(card, 1, 0.15)
 
-    local padding = create("UIPadding", {
+    create("UIPadding", {
         PaddingTop = UDim.new(0, 10),
         PaddingBottom = UDim.new(0, 10),
         PaddingLeft = UDim.new(0, 12),
@@ -323,7 +321,7 @@ function Library:Notify(config)
         Parent = card,
     })
 
-    local list = create("UIListLayout", {
+    create("UIListLayout", {
         FillDirection = Enum.FillDirection.Vertical,
         HorizontalAlignment = Enum.HorizontalAlignment.Left,
         SortOrder = Enum.SortOrder.LayoutOrder,
@@ -506,12 +504,12 @@ function Library:CreateWindow(config)
         Parent = frame,
     })
 
-    local sizeConstraint = create("UISizeConstraint", {
+    create("UISizeConstraint", {
         MinSize = window._minSize,
         Parent = frame,
     })
 
-    local rootList = create("UIListLayout", {
+    create("UIListLayout", {
         FillDirection = Enum.FillDirection.Vertical,
         SortOrder = Enum.SortOrder.LayoutOrder,
         Parent = frame,
@@ -524,7 +522,7 @@ function Library:CreateWindow(config)
         Parent = frame,
     })
 
-    local titlePadding = create("UIPadding", {
+    create("UIPadding", {
         PaddingLeft = UDim.new(0, 14),
         PaddingRight = UDim.new(0, 8),
         Parent = titleBar,
@@ -550,7 +548,7 @@ function Library:CreateWindow(config)
         Parent = titleBar,
     })
 
-    local buttonRowLayout = create("UIListLayout", {
+    create("UIListLayout", {
         FillDirection = Enum.FillDirection.Horizontal,
         HorizontalAlignment = Enum.HorizontalAlignment.Right,
         VerticalAlignment = Enum.VerticalAlignment.Center,
@@ -587,7 +585,7 @@ function Library:CreateWindow(config)
         Parent = frame,
     })
 
-    local bodyPadding = create("UIPadding", {
+    create("UIPadding", {
         PaddingLeft = UDim.new(0, 10),
         PaddingRight = UDim.new(0, 10),
         PaddingBottom = UDim.new(0, 10),
@@ -601,7 +599,7 @@ function Library:CreateWindow(config)
         Parent = body,
     })
 
-    local tabButtonList = create("UIListLayout", {
+    create("UIListLayout", {
         FillDirection = Enum.FillDirection.Horizontal,
         HorizontalAlignment = Enum.HorizontalAlignment.Left,
         VerticalAlignment = Enum.VerticalAlignment.Center,
@@ -813,7 +811,6 @@ function Window:AddTab(config)
 
     local tab = setmetatable({
         _window = self,
-        _components = {},
         _maid = Maid.new(),
     }, Tab)
 
@@ -853,7 +850,7 @@ function Window:AddTab(config)
         Parent = self._tabPages,
     })
 
-    local pagePadding = create("UIPadding", {
+    create("UIPadding", {
         PaddingTop = UDim.new(0, 4),
         PaddingBottom = UDim.new(0, 4),
         PaddingLeft = UDim.new(0, 4),
@@ -872,14 +869,14 @@ function Window:AddTab(config)
         Parent = page,
     })
 
-    local layout = create("UIListLayout", {
+    create("UIListLayout", {
         FillDirection = Enum.FillDirection.Vertical,
         SortOrder = Enum.SortOrder.LayoutOrder,
         Padding = UDim.new(0, 10),
         Parent = scroll,
     })
 
-    local scrollPadding = create("UIPadding", {
+    create("UIPadding", {
         PaddingTop = UDim.new(0, 2),
         PaddingBottom = UDim.new(0, 8),
         PaddingLeft = UDim.new(0, 2),
@@ -1127,7 +1124,13 @@ function Tab:AddSlider(config)
 
     local min = tonumber(config.Min) or 0
     local max = tonumber(config.Max) or 100
+    if min > max then
+        min, max = max, min
+    end
     local step = tonumber(config.Step) or 1
+    if step <= 0 then
+        step = 1
+    end
     local value = clamp(tonumber(config.Default) or min, min, max)
 
     local title = create("TextLabel", {
@@ -1296,14 +1299,14 @@ function Tab:AddDropdown(config)
     addRound(popup, UDim.new(0, 8))
     local popStroke = addStroke(popup, 1, 0.15)
 
-    local popLayout = create("UIListLayout", {
+    create("UIListLayout", {
         FillDirection = Enum.FillDirection.Vertical,
         SortOrder = Enum.SortOrder.LayoutOrder,
         Padding = UDim.new(0, 4),
         Parent = popup,
     })
 
-    local popPadding = create("UIPadding", {
+    create("UIPadding", {
         PaddingTop = UDim.new(0, 6),
         PaddingBottom = UDim.new(0, 6),
         PaddingLeft = UDim.new(0, 6),
